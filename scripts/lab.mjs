@@ -68,7 +68,18 @@ async function lockedOrder(db,value){const o=await resolve(db,'orders',value);re
 function editable(o){if(['ready','dispatched','cancelled'].includes(o.stage))throw Error(`Order is ${o.stage}; production edits are closed`);}
 async function insert(db,kind,obj){const keys=Object.keys(obj);return (await db.query(`INSERT INTO ${kind}(${keys.join(',')}) VALUES(${keys.map((_,i)=>'$'+(i+1)).join(',')}) RETURNING *`,Object.values(obj)))[0];}
 function privateFile(folder,label,body){const base=path.resolve(process.env.OUTPUT_DIR||REPO_ROOT,folder);fs.mkdirSync(base,{recursive:true,mode:0o700});const file=path.join(base,`${label}-${randomUUID()}.md`);fs.writeFileSync(file,body,{flag:'wx',mode:0o600});return {file};}
-function readable(rows){if(!rows.length)return 'No records.';return table(rows,Object.keys(rows[0]).map(k=>({key:k,label:k})));}
+const humanColumns={
+ 'due-board':['code','practice','stage','due_on','open_tasks','recorded_lots'],
+ 'lot-trace':['order_code','practice','lot_code','quantity','unit','delivery_ref'],
+ orders:['code','practice','product','technician','stage','due_on'],
+ activity:['kind','record_id','actor','created_at','detail']
+};
+function readable(rows,columns){if(!rows.length)return 'No records.';return table(rows,(columns||Object.keys(rows[0])).map(k=>({key:k,label:k})));}
+function human(result,command){
+ if(Array.isArray(result))return readable(result,humanColumns[command]);
+ if(command==='order')return Object.entries(result).map(([name,value])=>`${name.toUpperCase()}\n${Array.isArray(value)?readable(value):Object.entries(value).map(([k,v])=>`${k}: ${v??''}`).join('\n')}`).join('\n\n');
+ return Object.entries(result).map(([k,v])=>`${k}: ${v&&typeof v==='object'?JSON.stringify(v):v??''}`).join('\n');
+}
 async function importCsv(db,f){
  const file=required(f,'file'),raw=fs.readFileSync(file,'utf8');const rows=parseCsv(raw);if(!rows.length)throw Error('No data rows in CSV');
  const mapping=f.mapping?JSON.parse(fs.readFileSync(f.mapping,'utf8')):{};
@@ -181,6 +192,6 @@ export async function run(db,command,f={}){
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
  let db;let json=process.argv.includes('--json');
- try{const {command,flags}=parse(process.argv.slice(2));validate(command,flags);db=await getDb();const result=await run(db,command,flags);console.log(json?JSON.stringify(result,null,2):Array.isArray(result)?readable(result):JSON.stringify(result,null,2));}
+ try{const {command,flags}=parse(process.argv.slice(2));validate(command,flags);db=await getDb();const result=await run(db,command,flags);console.log(json?JSON.stringify(result,null,2):human(result,command));}
  catch(e){console.error(json?JSON.stringify({error:e.message}):e.message);process.exitCode=1;}finally{if(db)await db.close();}
 }

@@ -6,7 +6,15 @@
     "sections": [
       {
         "title": "Due this week",
-        "sql": "SELECT * FROM due_board ORDER BY due_on,code"
+        "sql": "SELECT * FROM due_board ORDER BY due_on,code",
+        "columns": [
+          "code",
+          "practice",
+          "stage",
+          "due_on",
+          "open_tasks",
+          "recorded_lots"
+        ]
       },
       {
         "title": "Bench workload",
@@ -24,7 +32,16 @@
     "sections": [
       {
         "title": "Materials and destinations",
-        "sql": "SELECT * FROM traceability ORDER BY lot_code,order_code"
+        "sql": "SELECT * FROM traceability ORDER BY lot_code,order_code",
+        "columns": [
+          "order_code",
+          "practice",
+          "lot_code",
+          "material",
+          "quantity",
+          "unit",
+          "delivery_ref"
+        ]
       }
     ]
   },
