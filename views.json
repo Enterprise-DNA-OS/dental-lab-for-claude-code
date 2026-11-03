@@ -1,13 +1,41 @@
 [
   {
     "name": "week",
-    "title": "This week",
-    "subtitle": "Dental Lab for Claude Code: what needs attention, rendered by npm run view",
+    "title": "Dental lab week",
+    "subtitle": "Synthetic demo when seeded. Read-only production records.",
     "sections": [
       {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
+        "title": "Due this week",
+        "sql": "SELECT * FROM due_board ORDER BY due_on,code"
+      },
+      {
+        "title": "Bench workload",
+        "sql": "SELECT * FROM bench_load ORDER BY overdue_tasks DESC,technician"
+      },
+      {
+        "title": "Remakes",
+        "sql": "SELECT code,practice,product,stage,due_on,remake_reason FROM order_desk WHERE remake_of IS NOT NULL ORDER BY due_on"
+      }
+    ]
+  },
+  {
+    "name": "traceability",
+    "title": "Material traceability",
+    "sections": [
+      {
+        "title": "Materials and destinations",
+        "sql": "SELECT * FROM traceability ORDER BY lot_code,order_code"
+      }
+    ]
+  },
+  {
+    "name": "review",
+    "title": "Evidence review",
+    "sections": [
+      {
+        "title": "Missing evidence and retention review",
+        "sql": "SELECT rule,record,finding,source FROM compliance_findings ORDER BY rule,record",
+        "note": "Limited record checks. Classification and release decisions remain with qualified staff."
       }
     ]
   }

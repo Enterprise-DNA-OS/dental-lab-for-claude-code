@@ -1,0 +1,23 @@
+INSERT INTO practices(id,code,name,owner,review_on,purpose) VALUES
+ ('10000000-0000-0000-0000-000000000001','HARBOUR','Harbour Demo Dental','Mira',CURRENT_DATE+60,'Lab case contact'),
+ ('10000000-0000-0000-0000-000000000002','HARBOUR-W','Harbour West Demo Dental','Noah',CURRENT_DATE-12,'Lab case contact') ON CONFLICT DO NOTHING;
+INSERT INTO cases(id,code,practice_id,patient_ref,prescription_ref,jurisdiction,device_kind,classification_evidence,implantable,statement_ref,conformity_ref) VALUES
+ ('20000000-0000-0000-0000-000000000001','CASE-101','10000000-0000-0000-0000-000000000001','SYNTHETIC-101','RX-DEMO-101','NZ','other','Demo operator review',false,null,null),
+ ('20000000-0000-0000-0000-000000000002','CASE-102','10000000-0000-0000-0000-000000000002','SYNTHETIC-102',null,'AU','unreviewed',null,null,null,null),
+ ('20000000-0000-0000-0000-000000000003','CASE-103','10000000-0000-0000-0000-000000000001','SYNTHETIC-103','RX-DEMO-103','AU','custom-made','Synthetic training example, not a classification recommendation',false,'STMT-DEMO-103','EP-DEMO-103') ON CONFLICT DO NOTHING;
+INSERT INTO orders(id,code,case_id,product,units,technician,received_on,due_on,stage,stage_since,manufactured_on,retain_until,dispatched_on,delivery_ref) VALUES
+ ('30000000-0000-0000-0000-000000000001','LAB-101','20000000-0000-0000-0000-000000000001','Crown work order',1,'Mira',CURRENT_DATE-10,CURRENT_DATE-2,'production',CURRENT_DATE-5,null,null,null,null),
+ ('30000000-0000-0000-0000-000000000002','LAB-102','20000000-0000-0000-0000-000000000002','Try-in work order',1,'Noah',CURRENT_DATE-15,CURRENT_DATE+1,'approval',CURRENT_DATE-9,null,null,null,null),
+ ('30000000-0000-0000-0000-000000000003','LAB-103','20000000-0000-0000-0000-000000000003','Custom device demo',1,'Mira',CURRENT_DATE-30,CURRENT_DATE-7,'dispatched',CURRENT_DATE-8,CURRENT_DATE-9,CURRENT_DATE+365,CURRENT_DATE-8,'DEL-DEMO-103'),
+ ('30000000-0000-0000-0000-000000000004','LAB-104','20000000-0000-0000-0000-000000000003','Crown remake',1,'Noah',CURRENT_DATE-2,CURRENT_DATE+3,'received',CURRENT_DATE-2,null,null,null,null) ON CONFLICT DO NOTHING;
+UPDATE orders SET remake_of='30000000-0000-0000-0000-000000000003',remake_reason='Synthetic shade rework example' WHERE code='LAB-104' AND remake_of IS NULL AND NOT EXISTS(SELECT 1 FROM activity);
+INSERT INTO tasks(id,order_id,label,technician,due_on) VALUES
+ ('40000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000001','Finish and inspect','Mira',CURRENT_DATE-2),
+ ('40000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000002','Record dentist return','Noah',CURRENT_DATE+1),
+ ('40000000-0000-0000-0000-000000000003','30000000-0000-0000-0000-000000000004','Prepare remake ticket','Noah',CURRENT_DATE+2) ON CONFLICT DO NOTHING;
+INSERT INTO lots(id,code,material,supplier,expires_on,evidence) VALUES
+ ('50000000-0000-0000-0000-000000000001','ZIR-DEMO-1','Zirconia demo','Synthetic Materials Ltd',CURRENT_DATE+90,'LOT-CERT-DEMO-1'),
+ ('50000000-0000-0000-0000-000000000002','RES-DEMO-2','Resin demo','Synthetic Materials Ltd',CURRENT_DATE-4,'LOT-CERT-DEMO-2') ON CONFLICT DO NOTHING;
+INSERT INTO lot_usage(id,order_id,lot_id,quantity,unit,used_on,actor) VALUES
+ ('60000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000001','50000000-0000-0000-0000-000000000001',1,'blank',CURRENT_DATE-3,'Demo seed'),
+ ('60000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000003','50000000-0000-0000-0000-000000000002',2,'grams',CURRENT_DATE-10,'Demo seed') ON CONFLICT DO NOTHING;

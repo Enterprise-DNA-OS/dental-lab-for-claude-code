@@ -1,115 +1,127 @@
-<h1 align="center">Dental Lab for Claude Code</h1>
+# Dental Lab for Claude Code
 
-<p align="center">
-  <strong>The open-source dental laboratory desk that is just a database and Claude Code.</strong>
-</p>
+Run your dental laboratory's case handoffs, bench tasks, material lots, remakes and dispatch records from a database you own.
 
-<p align="center">
-  Created by <a href="https://www.enterprisedna.co"><strong>Enterprise DNA</strong></a>. Free and open source. Works with Claude Code, Codex, OpenCode or Cursor.
-</p>
+## Three ways to own it
 
-<!-- three-doors -->
-<table align="center">
-  <tr>
-    <td align="center"><strong>Do it yourself</strong><br/>Clone it, run it, own it. Free, MIT.<br/><a href="#quick-start">Quick start</a></td>
-    <td align="center"><strong>We customise it</strong><br/>Your fields, your rules, your Labtrac data brought across.<br/><a href="https://enterprisedna.co/omni/book/?utm_source=github&utm_medium=readme&utm_campaign=labtrac">Book a call</a></td>
-    <td align="center"><strong>We run it for you</strong><br/>Installed, connected and operated inside Omni. Setup fee, then a retainer.<br/><a href="https://enterprisedna.co/omni/instead-of/labtrac?utm_source=github&utm_medium=readme&utm_campaign=labtrac">How it works</a></td>
-  </tr>
-</table>
+- **Do it yourself:** use the MIT-licensed base with Claude Code, Codex, OpenCode or Cursor. Hosting and your agent subscription are separate costs.
+- **We customise it:** Enterprise DNA maps your Labtrac records, fits your fields and production stages, connects your systems and builds a web front end or a different stack when needed. One setup fee, then a retainer.
+- **We run it for you:** Omni by Enterprise DNA installs your version, manages access and backups and keeps it working. One setup fee, then a retainer.
 
-<p align="center">
-  <a href="#what-is-this">What is this</a> &bull;
-  <a href="#why-no-front-end">Why no front end</a> &bull;
-  <a href="#quick-start">Quick start</a> &bull;
-  <a href="#the-commands">Commands</a> &bull;
-  <a href="#instead-of-labtrac">Instead of Labtrac</a> &bull;
-  <a href="#want-it-installed-and-run-for-you">Installed for you</a> &bull;
-  <a href="#license">License</a>
-</p>
+[Book a 30-minute call with Sam](https://enterprisedna.co/omni/book/?offer=replace-software&utm_source=github&utm_medium=readme&utm_campaign=labtrac).
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Node-20+-339933?style=flat-square" alt="Node 20+" />
-  <img src="https://img.shields.io/badge/PostgreSQL-any-336791?style=flat-square" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/PGlite-embedded-3ecf8e?style=flat-square" alt="PGlite" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT License" />
-</p>
+## Run the synthetic demo
 
----
+Node 20 or newer. No cloud account is required.
 
-## What is this
-
-Dental Lab for Claude Code does the job you pay Labtrac for, as a Postgres database and a set of agent commands. There is no web front end. You open the folder in [Claude Code](https://claude.com/claude-code) (or Codex, OpenCode, Cursor: see `AGENTS.md`) and ask for what you want in plain language. It runs the right query, and it can answer questions the Labtrac dashboard cannot.
-
-<!-- TODO(author): the annual bill. One sentence: what a 10 to 50 person business typically pays Labtrac per year, all in, with a source. -->
-
-Want the same thing with a web front end, or built on a different stack? That is a customisation, and it is exactly what Enterprise DNA does: [book a call](https://enterprisedna.co/omni/book/?utm_source=github&utm_medium=readme&utm_campaign=labtrac).
-
-<!-- TODO(author): two or three sentences on what this specific product covers and who it is for. -->
-
-## Why no front end
-
-- The front end was only ever there because the database was hard to talk to. That is no longer true.
-- Your data sits in plain Postgres tables you own. Any tool can read them. No export, no lock-in.
-- No seats, no tiers, no add-ons. Read [docs/why-no-front-end.md](docs/why-no-front-end.md) for the honest trade-offs too.
-
-## Quick start
-
-Sixty seconds, no database install (an embedded Postgres runs inside Node):
-
-```bash
-git clone https://github.com/Enterprise-DNA-OS/dental-lab-for-claude-code.git
-cd dental-lab-for-claude-code
+```sh
 npm install
+npm test
 npm run demo
+npm run lab -- due-board
+npm run lab -- approval-chase
+npm run lab -- lot-trace --lot=RES-DEMO-2 --json
+npm run view
+npm run docs
 ```
 
-Then open the folder in Claude Code and type a slash command. <!-- TODO(author): name the first command to try. -->
+The demo contains invented practice and patient references, an overdue crown order, an old dentist approval, a remake and an insufficient retention date. Seed only a demo database. Existing rows remain unchanged on repeat seeding. Use a fresh DATA_DIR for real records. DATABASE_URL selects PostgreSQL; otherwise PGlite stores records under .data/db. Dates use UTC day boundaries.
 
-### Use it with your own Postgres or Supabase
+## What the base does
 
-Copy `.env.example` to `.env`, set `DATABASE_URL`, then `npm run migrate`. Same commands, shared data, no per-seat fee.
+Cases group orders for the same treatment record. Each order has its own product, quantity, technician, received date and due date. Remakes keep a reference to the original order in the same case. Tasks carry due dates and completion evidence. A material lot can be traced through its recorded use to a practice and dispatch reference.
 
-## The commands
+Production moves through received, production, approval, quality review, ready and dispatched. Returning from dentist approval means an explicit move to production. A failed quality review returns work to production. Cancellation keeps history. A quality pass requires completed tasks, a prescription reference and recorded material lots. Dispatch requires a recorded pass and the applicable evidence checks. No software check evaluates a device's clinical suitability.
 
-<!-- TODO(author): a table of the slash commands in .claude/commands and what each one does. -->
+Material use, quality reviews, import batches and activity are append-only. Imports preserve the original file and extra columns. Identical file-and-mapping imports are no-ops. Existing order codes are never overwritten by a changed extract. Imported orders enter received for reconciliation, even when a source column says completed.
 
-| Command | What it does |
+Labtrac also provides scanner intake, manufacturing connections, billing and customer screens. This base is a production record desk. It contains no CAD/CAM, STL viewer, clinical decision engine, scanner integration, live courier booking, accounting or payments. Enterprise DNA scopes those connections and screens separately. Physical quality review, legal classification and external regulatory submissions remain with qualified people.
+
+## Recurring jobs
+
+| Command | Purpose |
 |---|---|
-| `/...` | ... |
+| /help | Read accepted commands and flags. |
+| /practices | Read lab customers and purpose review dates. |
+| /cases | Read cases, patient references and prescription references. |
+| /orders | Read the production ledger. |
+| /due-board | Find overdue work and deliveries due within seven days. |
+| /bench-load | Count open and overdue tasks by technician. |
+| /approval-chase | Find work still with a dentist and days waiting. |
+| /lots | Read material lots and expiry dates. |
+| /lot-trace | Find every recorded order and destination for one material lot. |
+| /remakes | Read remakes beside the original order and reason. |
+| /compliance | Review missing record evidence and retention dates. |
+| /activity | Read the append-only change record. |
+| /order | Read an order with tasks, materials, quality evidence and history. |
+| /add-practice | Register a practice with an owner and purpose review date. |
+| /add-case | Register a case using a patient reference and authorised prescription. |
+| /add-order | Log a work order or a remake within the same case. |
+| /add-task | Add a dated bench task to an open order. |
+| /finish-task | Record completed work with its evidence. |
+| /move-order | Record production, dentist approval, return, quality or cancellation handoffs. |
+| /add-lot | Register a material lot and its evidence. |
+| /use-lot | Record material used in production, checking the expiry and receipt dates. |
+| /record-qc | Record the actual quality review and supporting evidence. |
+| /dispatch | Record a completed dispatch after the quality and record checks. |
+| /review-case | Record a qualified reviewer's device pathway and evidence references. |
+| /retention | Record the retention date agreed for one order. |
+| /review-practice | Record the purpose review for practice contact information. |
+| /import | Validate and import mapped Labtrac records. |
+| /export | Write a new complete private JSON snapshot. |
+| /weekly-review | Draft the weekly lab review from three current reports. |
+| /draft-chase | Draft a dentist approval follow-up without sending it. |
+| /customise | Change fields or rules with a tested migration. |
+| /new-view | Add a branded read-only report from current records. |
 
-## Instead of Labtrac
+There are 30 CLI commands and 32 slash commands. Every CLI command supports --json. Values use --name=value. Exact codes take precedence, followed by case-insensitive names or id prefixes. Ambiguous matches list candidates and exit 1. `npm run lab -- help` lists all flags.
 
-<!-- TODO(author): how to bring data across from Labtrac; link docs/replace-labtrac.md -->
+## Ten questions your records answer
 
-## Architecture
+1. Which orders are overdue despite still having unfinished bench tasks? (`due-board`)
+2. Who has the most overdue work on their bench? (`bench-load`)
+3. Which dentist approvals have been waiting longest? (`approval-chase`)
+4. Which practices received work using a particular material lot? (`lot-trace --lot=RES-DEMO-2`)
+5. Which remakes refer back to an earlier order, and why? (`remakes`)
+6. Which finished custom-made records have an insufficient retention date? (`compliance`)
+7. Which upcoming deliveries have no recorded material lot? (`due-board`)
+8. What evidence supported the quality review of this order? (`order --order=LAB-103`)
+9. Which practice contact records need a purpose review? (`compliance`)
+10. Who recorded each handoff, and what evidence did they provide? (`activity`)
 
-```
-dental-lab-for-claude-code/
-  CLAUDE.md                 how the operator wants this run (routing table + house rules)
-  AGENTS.md                 the same, for Codex / OpenCode / Cursor / Gemini CLI
-  .claude/commands/         the slash commands
-  scripts/                  the CLI the commands drive
-  scripts/lib/db.mjs        one adapter: DATABASE_URL (pg) or embedded PGlite
-  supabase/migrations/      plain SQL schema
-  supabase/seed.sql         demo data
-  docs/                     the thesis and the migration guide
-```
+These are executable analyses, not an unsupported claim that Labtrac cannot answer them. Owning the data lets you extend the questions around your lab's decisions.
 
-## Built for coding agents
+## Your first hour: ten things to ask for
 
-The database, CLI and command recipes work with Claude Code, Codex, OpenCode or Cursor. Ask your coding agent for a new command and have it implement and test the change against the same records.
+1. Put our name, logo and colours in brand.json.
+2. Show overdue work with unfinished tasks.
+3. Show which dentist approvals are oldest.
+4. Trace one material lot to every recorded destination.
+5. Draft our weekly review from current records.
+6. Draft one approval follow-up without sending it.
+7. Test a mapped extract and reconcile every order.
+8. Show remakes and the original work they refer to.
+9. Add our bench location with a tested migration.
+10. Export a private snapshot before changing rules.
 
-## Contributing
+## Switch from Labtrac
 
-Issues and pull requests are welcome. Keep the shape: plain SQL, a small CLI, a slash command per recurring job, no front end.
+Read [the replace guide](docs/replace-labtrac.md). Labtrac documents a case and order model and invoice/PDF exports. We did not verify a standard whole-account CSV export. Obtain an authorised extract from your installation or Labtrac support, map its headings, then import the prepared file in one command. A same-day switch depends on having that extract and checking it. The fixture is synthetic and is not evidence of a vendor export layout.
 
-## Want it installed and run for you?
+## Documents, views and compliance
 
-Enterprise DNA installs Dental Lab for Claude Code for your business, migrates your Labtrac data, connects it to the rest of your tools, and runs it for you as part of **Omni**, our managed Command Center. One setup fee, then a monthly retainer.
+npm run docs writes work tickets, material trace records, delivery-note working copies and remake reports. npm run view writes a weekly board, material trace report and evidence review. Change brand.json once to brand every output. Generated files remain private and nothing sends or publishes.
 
-- Book a call: [enterprisedna.co/omni/book](https://enterprisedna.co/omni/book/?offer=replace-software&utm_source=github&utm_medium=readme&utm_campaign=labtrac)
-- Read more: [enterprisedna.co/omni/instead-of/labtrac](https://enterprisedna.co/omni/instead-of/labtrac?utm_source=github&utm_medium=readme&utm_campaign=labtrac)
+[Compliance](docs/compliance.md) defines the limited record checks, cited rules and unresolved reviews. The tool does not certify a lab, classify a medical device or generate a signed statutory device statement. Patient-specific does not automatically mean custom-made under Australian rules.
 
-## License
+## Operation and validation
 
-MIT. Copyright (c) 2026 Enterprise DNA.
+Use a trusted operator account. An actor label records attribution but is not authentication. All domain tables have row-level security enabled and PUBLIC privileges removed. A database owner can bypass these controls. Multi-user access needs a separate access-control design. Keep patient reference mappings and original documents in your controlled clinical document store. Do not commit patient information, real extracts or reports.
+
+`export --file=exports/snapshot.json` writes a complete new JSON snapshot, including raw imports and activity. Protect it like the database. Use native backups too. Snapshot restore is a reviewed maintenance task, not an automated command. Never overwrite a backup.
+
+npm test uses a temporary database and checks every CLI command, state transitions, dates, material traceability, remake linkage, retention checks, import rollback, duplicate handling, exports and escaped branded HTML. The workflow runs Node 20 and 22 on Windows and Ubuntu plus PostgreSQL. TEST_DATABASE_URL must name an empty disposable database. Actual execution results are reported separately from the configured test matrix.
+
+## Licence
+
+MIT. Copyright 2026 Enterprise DNA. Labtrac belongs to its owner. This independent implementation contains no vendor code or assets.

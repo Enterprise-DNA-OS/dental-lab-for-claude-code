@@ -1,0 +1,42 @@
+[
+  {
+    "question": "Which orders are overdue despite still having unfinished bench tasks?",
+    "command": "due-board"
+  },
+  {
+    "question": "Who has the most overdue work on their bench?",
+    "command": "bench-load"
+  },
+  {
+    "question": "Which dentist approvals have been waiting longest?",
+    "command": "approval-chase"
+  },
+  {
+    "question": "Which practices received work using a particular material lot?",
+    "command": "lot-trace --lot=RES-DEMO-2"
+  },
+  {
+    "question": "Which remakes refer back to an earlier order, and why?",
+    "command": "remakes"
+  },
+  {
+    "question": "Which finished custom-made records have an insufficient retention date?",
+    "command": "compliance"
+  },
+  {
+    "question": "Which upcoming deliveries have no recorded material lot?",
+    "command": "due-board"
+  },
+  {
+    "question": "What evidence supported the quality review of this order?",
+    "command": "order --order=LAB-103"
+  },
+  {
+    "question": "Which practice contact records need a purpose review?",
+    "command": "compliance"
+  },
+  {
+    "question": "Who recorded each handoff, and what evidence did they provide?",
+    "command": "activity"
+  }
+]

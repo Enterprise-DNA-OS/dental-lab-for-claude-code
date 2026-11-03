@@ -1,0 +1,3 @@
+practice_code,practice_name,case_code,patient_ref,order_code,product,units,technician,received_on,due_on,prescription_ref,jurisdiction,Original Status,Private Note
+DEMO-IMP,Synthetic Export Practice,EXPORT-CASE-1,SYNTHETIC-EXPORT-1,EXPORT-ORDER-1,Crown,1,Demo Technician,2026-01-05,2026-01-15,RX-EXPORT-1,NZ,Completed,"Preserved, not interpreted"
+DEMO-IMP,Synthetic Export Practice,EXPORT-CASE-2,SYNTHETIC-EXPORT-2,EXPORT-ORDER-2,Try-in,2,Demo Technician,2026-01-06,2026-01-16,,AU,On Approval,Preserved field

@@ -1,11 +1,72 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
-    "file": "name",
+    "name": "work-ticket",
+    "title": "Lab work ticket",
+    "for_each": "SELECT id,code FROM orders ORDER BY code",
+    "file": "code",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      {
+        "title": "Order",
+        "layout": "record",
+        "sql": "SELECT code,case_code,practice,product,units,technician,stage,due_on FROM order_desk WHERE id=$1"
+      },
+      {
+        "title": "Bench tasks",
+        "sql": "SELECT label,technician,due_on,done_on,evidence FROM tasks WHERE order_id=$1 ORDER BY due_on,id"
+      },
+      {
+        "title": "Prescription reference",
+        "sql": "SELECT c.prescription_ref FROM cases c JOIN orders o ON o.case_id=c.id WHERE o.id=$1",
+        "note": "Use the original authorised prescription. This ticket does not prescribe or design a device."
+      }
+    ]
+  },
+  {
+    "name": "material-record",
+    "title": "Material trace record",
+    "for_each": "SELECT id,code FROM orders ORDER BY code",
+    "file": "code",
+    "sections": [
+      {
+        "title": "Order",
+        "layout": "record",
+        "sql": "SELECT code,practice,product,dispatched_on,delivery_ref FROM order_desk WHERE id=$1"
+      },
+      {
+        "title": "Material lots",
+        "sql": "SELECT t.* FROM traceability t JOIN orders o ON o.code=t.order_code WHERE o.id=$1"
+      },
+      {
+        "title": "Quality evidence",
+        "sql": "SELECT passed,evidence,actor,reviewed_on FROM qc_reviews WHERE order_id=$1 ORDER BY created_at,id"
+      }
+    ]
+  },
+  {
+    "name": "delivery-note",
+    "title": "Delivery note working copy",
+    "for_each": "SELECT id,code FROM orders WHERE stage='dispatched' ORDER BY code",
+    "file": "code",
+    "sections": [
+      {
+        "title": "Recorded dispatch",
+        "layout": "record",
+        "sql": "SELECT code,case_code,practice,product,units,dispatched_on,delivery_ref FROM order_desk WHERE id=$1",
+        "note": "Working record from the recorded dispatch. Check recipient and shipment evidence before sharing. Not a statutory device statement."
+      }
+    ]
+  },
+  {
+    "name": "remake-report",
+    "title": "Remake review",
+    "for_each": "SELECT id,code FROM orders WHERE remake_of IS NOT NULL ORDER BY code",
+    "file": "code",
+    "sections": [
+      {
+        "title": "Remake record",
+        "layout": "record",
+        "sql": "SELECT o.code,p.code AS original,o.product,o.remake_reason,o.stage,o.due_on FROM orders o JOIN orders p ON p.id=o.remake_of WHERE o.id=$1"
+      }
     ]
   }
 ]
